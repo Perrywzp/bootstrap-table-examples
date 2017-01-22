@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bootstrap Table Examples</title>
+    <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/bootstrap-table/src/bootstrap-table.css">
+    <link rel="stylesheet" href="../assets/examples.css">
+    <script src="../assets/jquery.min.js"></script>
+    <script src="../assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../assets/bootstrap-table/src/bootstrap-table.js"></script>
+    <script src="../ga.js"></script>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/json2/20140204/json2.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+    <div id="toolbar">
+        <button id="remove" class="btn btn-danger" disabled>
+            <i class="glyphicon glyphicon-remove"></i> Delete
+        </button>
+    </div>
+    <table id="table"
+           data-toolbar="#toolbar"
+           data-search="true"
+           data-show-refresh="true"
+           data-show-toggle="true"
+           data-minimum-count-columns="2"
+           data-show-pagination-switch="true"
+           data-pagination="true"
+           data-id-field="id"
+           data-show-footer="true"
+           data-response-handler="responseHandler">
+    </table>
+</div>
+
+<script>
+    var $table = $('#table');
+
+    function initTable() {
+        $table.bootstrapTable({
+            height: getHeight(),
+            columns: [
+                [{
+                    title: '时段',
+                    rowspan: 2,
+                    align: 'center',
+                    field:"timeRank",
+                    valign: 'middle',
+                    footerFormatter: totalTextFormatter,
+                }, {
+                    title: '本期',
+                    colspan: 2,
+                    align: 'center'
+                }, {
+                    title: '环比',
+                    colspan: 3,
+                    align: 'center'
+                }],
+                [{
+                    field: 'currentNum',
+                    title: '本期区间',
+                    footerFormatter: averageNumsFormatter,
+                    align: 'center'
+                }, {
+                    field: 'percent',
+                    title: '所占百分比',
+                    align: 'center',
+                    footerFormatter: averagePercentFormatter
+                }, {
+                    field: 'chainNum',
+                    title: '环比区间',
+                    align: 'center',
+                    footerFormatter: averageNumsFormatter
+                }, {
+                    field: 'difference',
+                    title: '差额',
+                    align: 'center',
+                    footerFormatter: averageNumsFormatter
+
+                }, {
+                    field: 'increaseRate',
+                    title: '增长率',
+                    align: 'center',
+                    footerFormatter: averagePercentFormatter
+                }]
+            ],
+            data: [
+                {
+                    "timeRank": "2016-12-27",
+                    "currentNum": 120,
+                    "percent": "9%",
+                    "chainNum": 120,
+                    "difference": 0,
+                    "increaseRate": 0
+                },
+                {
+                    "timeRank": "2016-12-28",
+                    "currentNum": 234,
+                    "percent": "8%",
+                    "chainNum": 325,
+                    "difference": -91,
+                    "increaseRate": "-28%"
+                },
+                {
+                    "timeRank": "2016-12-29",
+                    "currentNum": 432,
+                    "percent": "10%",
+                    "chainNum": 254,
+                    "difference": 178,
+                    "increaseRate": "39%"
+                },
+                {
+                    "timeRank": "2016-12-30",
+                    "currentNum": 120,
+                    "percent": "9%",
+                    "chainNum": 120,
+                    "difference": 0,
+                    "increaseRate": 0
+                },
+                {
+                    "timeRank": "2016-12-31",
+                    "currentNum": 234,
+                    "percent": "8%",
+                    "chainNum": 325,
+                    "difference": -91,
+                    "increaseRate": "-28%"
+                },
+                {
+                    "timeRank": "2016-01-01",
+                    "currentNum": 432,
+                    "percent": "10%",
+                    "chainNum": 254,
+                    "difference": 178,
+                    "increaseRate": "39%"
+                },
+                {
+                    "timeRank": "2016-01-02",
+                    "currentNum": 120,
+                    "percent": "9%",
+                    "chainNum": 120,
+                    "difference": 0,
+                    "increaseRate": 0
+                }
+            ]
+        });
+        // sometimes footer render error.
+        setTimeout(function () {
+            $table.bootstrapTable('resetView');
+        }, 200);
+
+
+        $(window).resize(function () {
+            $table.bootstrapTable('resetView', {
+                height: getHeight()
+            });
+        });
+    }
+
+    function totalTextFormatter(data) {
+        return '均值';
+    }
+
+    function averageNumsFormatter(data) {
+        var field = this.field;
+        var total_sum = data.reduce(function(sum, row) {
+            return (sum) + (row[field] || 0);
+        }, 0);
+        return Math.floor(total_sum / data.length);
+    }
+
+    function averagePercentFormatter(data) {
+        var field = this.field;
+        var total_sum = data.reduce(function(sum, row) {
+            return (sum) + (row[field] && parseInt(row[field].split("%")[0]) || 0);
+        }, 0);
+        return Math.floor(total_sum / data.length) + "%";
+    }
+    function getHeight() {
+        return $(window).height() - $('h1').outerHeight(true);
+    }
+
+    $(function () {
+        var scripts = [
+                location.search.substring(1) || '../assets/bootstrap-table/src/bootstrap-table.js',
+                '../assets/bootstrap-table/src/extensions/export/bootstrap-table-export.js',
+                'http://rawgit.com/hhurz/tableExport.jquery.plugin/master/tableExport.js',
+                '../assets/bootstrap-table/src/extensions/editable/bootstrap-table-editable.js',
+                'http://rawgit.com/vitalets/x-editable/master/dist/bootstrap3-editable/js/bootstrap-editable.js'
+            ],
+            eachSeries = function (arr, iterator, callback) {
+                callback = callback || function () {
+                    };
+                if (!arr.length) {
+                    return callback();
+                }
+                var completed = 0;
+                var iterate = function () {
+                    iterator(arr[completed], function (err) {
+                        if (err) {
+                            callback(err);
+                            callback = function () {
+                            };
+                        }
+                        else {
+                            completed += 1;
+                            if (completed >= arr.length) {
+                                callback(null);
+                            }
+                            else {
+                                iterate();
+                            }
+                        }
+                    });
+                };
+                iterate();
+            };
+
+        eachSeries(scripts, getScript, initTable);
+    });
+
+    function getScript(url, callback) {
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.src = url;
+
+        var done = false;
+        // Attach handlers for all browsers
+        script.onload = script.onreadystatechange = function () {
+            if (!done && (!this.readyState ||
+                this.readyState == 'loaded' || this.readyState == 'complete')) {
+                done = true;
+                if (callback)
+                    callback();
+
+                // Handle memory leak in IE
+                script.onload = script.onreadystatechange = null;
+            }
+        };
+
+        head.appendChild(script);
+
+        // We handle everything using the script element injection
+        return undefined;
+    }
+</script>
+</body>
+</html>
